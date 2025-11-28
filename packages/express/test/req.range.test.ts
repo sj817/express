@@ -1,0 +1,102 @@
+import express from '../src/index';
+import request from 'supertest'
+
+describe('req', function(){
+  describe('.range(size)', function(){
+    it('should return parsed ranges', function (done: any) {
+      const app = express()
+
+      app.use(function (req: any, res: any) {
+        res.json(req.range(120))
+      })
+
+      request(app)
+      .get('/')
+      .set('Range', 'bytes=0-50,51-100')
+      .expect(200, '[{"start":0,"end":50},{"start":51,"end":100}]', done)
+    })
+
+    it('should cap to the given size', function (done: any) {
+      const app = express()
+
+      app.use(function (req: any, res: any) {
+        res.json(req.range(75))
+      })
+
+      request(app)
+      .get('/')
+      .set('Range', 'bytes=0-100')
+      .expect(200, '[{"start":0,"end":74}]', done)
+    })
+
+    it('should cap to the given size when open-ended', function (done: any) {
+      const app = express()
+
+      app.use(function (req: any, res: any) {
+        res.json(req.range(75))
+      })
+
+      request(app)
+      .get('/')
+      .set('Range', 'bytes=0-')
+      .expect(200, '[{"start":0,"end":74}]', done)
+    })
+
+    it('should have a .type', function (done: any) {
+      const app = express()
+
+      app.use(function (req: any, res: any) {
+        res.json(req.range(120).type)
+      })
+
+      request(app)
+      .get('/')
+      .set('Range', 'bytes=0-100')
+      .expect(200, '"bytes"', done)
+    })
+
+    it('should accept any type', function (done: any) {
+      const app = express()
+
+      app.use(function (req: any, res: any) {
+        res.json(req.range(120).type)
+      })
+
+      request(app)
+      .get('/')
+      .set('Range', 'users=0-2')
+      .expect(200, '"users"', done)
+    })
+
+    it('should return undefined if no range', function (done: any) {
+      const app = express()
+
+      app.use(function (req: any, res: any) {
+        res.send(String(req.range(120)))
+      })
+
+      request(app)
+      .get('/')
+      .expect(200, 'undefined', done)
+    })
+  })
+
+  describe('.range(size, options)', function(){
+    describe('with "combine: true" option', function(){
+      it('should return combined ranges', function (done: any) {
+        const app = express()
+
+        app.use(function (req: any, res: any) {
+          res.json(req.range(120, {
+            combine: true
+          }))
+        })
+
+        request(app)
+        .get('/')
+        .set('Range', 'bytes=0-50,51-100')
+        .expect(200, '[{"start":0,"end":100}]', done)
+      })
+    })
+  })
+})
