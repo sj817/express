@@ -1,0 +1,3 @@
+[submodule "packages/path-to-regexp"]
+	path = packages/path-to-regexp
+	url = https://github.com/pillarjs/path-to-regexp
