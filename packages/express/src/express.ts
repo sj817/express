@@ -50,7 +50,7 @@ function createApplication () {
 }
 
 export const express = Object.assign(createApplication, {
-  application: proto,
+  application: Application.prototype,
   request: req,
   response: res,
   Route,
@@ -63,6 +63,7 @@ export const express = Object.assign(createApplication, {
 })
 
 export {
+  Application,
   proto as application,
   req as request,
   res as response,
@@ -70,5 +71,3 @@ export {
   Router,
   express as default,
 }
-
-console.log(express)

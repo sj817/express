@@ -30,41 +30,41 @@ const debug = debugModule('router:route')
  * 表示一个路由，包含路径和多个处理该路径的中间件层
  */
 export class Route<T extends PathParams = PathParams> {
-  'acl'!: IRouterHandler<this, T>
-  'bind'!: IRouterHandler<this, T>
-  'checkout'!: IRouterHandler<this, T>
-  'connect'!: IRouterHandler<this, T>
-  'copy'!: IRouterHandler<this, T>
-  'delete'!: IRouterHandler<this, T>
-  'get'!: IRouterHandler<this, T>
-  'head'!: IRouterHandler<this, T>
-  'link'!: IRouterHandler<this, T>
-  'lock'!: IRouterHandler<this, T>
-  'm-search'!: IRouterHandler<this, T>
-  'merge'!: IRouterHandler<this, T>
-  'mkactivity'!: IRouterHandler<this, T>
-  'mkcalendar'!: IRouterHandler<this, T>
-  'mkcol'!: IRouterHandler<this, T>
-  'move'!: IRouterHandler<this, T>
-  'notify'!: IRouterHandler<this, T>
-  'options'!: IRouterHandler<this, T>
-  'patch'!: IRouterHandler<this, T>
-  'post'!: IRouterHandler<this, T>
-  'propfind'!: IRouterHandler<this, T>
-  'proppatch'!: IRouterHandler<this, T>
-  'purge'!: IRouterHandler<this, T>
-  'put'!: IRouterHandler<this, T>
-  'query'!: IRouterHandler<this, T>
-  'rebind'!: IRouterHandler<this, T>
-  'report'!: IRouterHandler<this, T>
-  'search'!: IRouterHandler<this, T>
-  'source'!: IRouterHandler<this, T>
-  'subscribe'!: IRouterHandler<this, T>
-  'trace'!: IRouterHandler<this, T>
-  'unbind'!: IRouterHandler<this, T>
-  'unlink'!: IRouterHandler<this, T>
-  'unlock'!: IRouterHandler<this, T>
-  'unsubscribe'!: IRouterHandler<this, T>
+  declare 'acl': IRouterHandler<this, T>
+  declare 'bind': IRouterHandler<this, T>
+  declare 'checkout': IRouterHandler<this, T>
+  declare 'connect': IRouterHandler<this, T>
+  declare 'copy': IRouterHandler<this, T>
+  declare 'delete': IRouterHandler<this, T>
+  declare 'get': IRouterHandler<this, T>
+  declare 'head': IRouterHandler<this, T>
+  declare 'link': IRouterHandler<this, T>
+  declare 'lock': IRouterHandler<this, T>
+  declare 'm-search': IRouterHandler<this, T>
+  declare 'merge': IRouterHandler<this, T>
+  declare 'mkactivity': IRouterHandler<this, T>
+  declare 'mkcalendar': IRouterHandler<this, T>
+  declare 'mkcol': IRouterHandler<this, T>
+  declare 'move': IRouterHandler<this, T>
+  declare 'notify': IRouterHandler<this, T>
+  declare 'options': IRouterHandler<this, T>
+  declare 'patch': IRouterHandler<this, T>
+  declare 'post': IRouterHandler<this, T>
+  declare 'propfind': IRouterHandler<this, T>
+  declare 'proppatch': IRouterHandler<this, T>
+  declare 'purge': IRouterHandler<this, T>
+  declare 'put': IRouterHandler<this, T>
+  declare 'query': IRouterHandler<this, T>
+  declare 'rebind': IRouterHandler<this, T>
+  declare 'report': IRouterHandler<this, T>
+  declare 'search': IRouterHandler<this, T>
+  declare 'source': IRouterHandler<this, T>
+  declare 'subscribe': IRouterHandler<this, T>
+  declare 'trace': IRouterHandler<this, T>
+  declare 'unbind': IRouterHandler<this, T>
+  declare 'unlink': IRouterHandler<this, T>
+  declare 'unlock': IRouterHandler<this, T>
+  declare 'unsubscribe': IRouterHandler<this, T>
 
   /** 路由路径 */
   path: PathParams

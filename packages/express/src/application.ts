@@ -40,44 +40,43 @@ export class Application<
 > extends EventEmitter {
   get!: ((name: string) => any) & IRouterMatcher<this, 'get'>
 
-  all!: IRouterMatcher<this, 'all'>
-  acl!: IRouterMatcher<this, 'acl'>
-  bind!: IRouterMatcher<this, 'bind'>
-  checkout!: IRouterMatcher<this, 'checkout'>
-  connect!: IRouterMatcher<this, 'connect'>
-  copy!: IRouterMatcher<this, 'copy'>
-  delete!: IRouterMatcher<this, 'delete'>
-  head!: IRouterMatcher<this, 'head'>
-  link!: IRouterMatcher<this, 'link'>
-  lock!: IRouterMatcher<this, 'lock'>
-  'm-search'!: IRouterMatcher<this, 'm-search'>
-  merge!: IRouterMatcher<this, 'merge'>
-  mkactivity!: IRouterMatcher<this, 'mkactivity'>
-  mkcalendar!: IRouterMatcher<this, 'mkcalendar'>
-  mkcol!: IRouterMatcher<this, 'mkcol'>
-  move!: IRouterMatcher<this, 'move'>
-  notify!: IRouterMatcher<this, 'notify'>
-  options!: IRouterMatcher<this, 'options'>
-  patch!: IRouterMatcher<this, 'patch'>
-  post!: IRouterMatcher<this, 'post'>
-  propfind!: IRouterMatcher<this, 'propfind'>
-  proppatch!: IRouterMatcher<this, 'proppatch'>
-  purge!: IRouterMatcher<this, 'purge'>
-  put!: IRouterMatcher<this, 'put'>
-  query!: IRouterMatcher<this, 'query'>
-  rebind!: IRouterMatcher<this, 'rebind'>
-  report!: IRouterMatcher<this, 'report'>
-  search!: IRouterMatcher<this, 'search'>
-  source!: IRouterMatcher<this, 'source'>
-  subscribe!: IRouterMatcher<this, 'subscribe'>
-  trace!: IRouterMatcher<this, 'trace'>
-  unbind!: IRouterMatcher<this, 'unbind'>
-  unlink!: IRouterMatcher<this, 'unlink'>
-  unlock!: IRouterMatcher<this, 'unlock'>
-  unsubscribe!: IRouterMatcher<this, 'unsubscribe'>
+  declare all: IRouterMatcher<this, 'all'>
+  declare acl: IRouterMatcher<this, 'acl'>
+  declare bind: IRouterMatcher<this, 'bind'>
+  declare checkout: IRouterMatcher<this, 'checkout'>
+  declare connect: IRouterMatcher<this, 'connect'>
+  declare copy: IRouterMatcher<this, 'copy'>
+  declare delete: IRouterMatcher<this, 'delete'>
+  declare head: IRouterMatcher<this, 'head'>
+  declare link: IRouterMatcher<this, 'link'>
+  declare lock: IRouterMatcher<this, 'lock'>
+  declare 'msearch': IRouterMatcher<this, 'm-search'>
+  declare merge: IRouterMatcher<this, 'merge'>
+  declare mkactivity: IRouterMatcher<this, 'mkactivity'>
+  declare mkcalendar: IRouterMatcher<this, 'mkcalendar'>
+  declare mkcol: IRouterMatcher<this, 'mkcol'>
+  declare move: IRouterMatcher<this, 'move'>
+  declare notify: IRouterMatcher<this, 'notify'>
+  declare options: IRouterMatcher<this, 'options'>
+  declare patch: IRouterMatcher<this, 'patch'>
+  declare post: IRouterMatcher<this, 'post'>
+  declare propfind: IRouterMatcher<this, 'propfind'>
+  declare proppatch: IRouterMatcher<this, 'proppatch'>
+  declare purge: IRouterMatcher<this, 'purge'>
+  declare put: IRouterMatcher<this, 'put'>
+  declare query: IRouterMatcher<this, 'query'>
+  declare rebind: IRouterMatcher<this, 'rebind'>
+  declare report: IRouterMatcher<this, 'report'>
+  declare search: IRouterMatcher<this, 'search'>
+  declare source: IRouterMatcher<this, 'source'>
+  declare subscribe: IRouterMatcher<this, 'subscribe'>
+  declare trace: IRouterMatcher<this, 'trace'>
+  declare unbind: IRouterMatcher<this, 'unbind'>
+  declare unlink: IRouterMatcher<this, 'unlink'>
+  declare unlock: IRouterMatcher<this, 'unlock'>
+  declare unsubscribe: IRouterMatcher<this, 'unsubscribe'>
 
-  #router: ReturnType<typeof Router> | null = null
-
+  _router: ReturnType<typeof Router> | null = null
   cache!: Record<string, any>
   engines!: Record<string, any>
   settings!: any
@@ -87,26 +86,7 @@ export class Application<
   request!: Request
   response!: Response
 
-  use: ApplicationRequestHandler<this>
-
-  constructor () {
-    super()
-
-    this.use = this._use.bind(this)
-    methods.forEach((method) => {
-      // @ts-ignore
-      this[method] = function (this: Application, path: string, ...args: any[]) {
-        if (method === 'get' && args.length === 0) {
-          // app.get(setting)
-          return this.set(path)
-        }
-
-        const route = this.route(path)
-        route[method].apply(route, args)
-        return this
-      }
-    })
-  }
+  use!: ApplicationRequestHandler<this>
 
   /**
    * Initialize the server.
@@ -126,14 +106,14 @@ export class Application<
   }
 
   get router () {
-    if (this.#router === null) {
-      this.#router = new Router({
+    if (!this._router) {
+      this._router = new Router({
         caseSensitive: this.enabled('case sensitive routing'),
         strict: this.enabled('strict routing'),
       })
     }
 
-    return this.#router
+    return this._router
   }
 
   /**
@@ -244,7 +224,7 @@ export class Application<
    *
    * @public
    */
-  private _use (...args: any[]) {
+  _use (...args: any[]) {
     let offset = 0
     let path = '/'
 
@@ -274,8 +254,9 @@ export class Application<
 
     // get router
     const router = this.router
+    const self = this
 
-    fns.forEach(function (this: Application, fn: any) {
+    fns.forEach((fn: any) => {
       // non-express app
       if (!fn || !fn.handle || !fn.set) {
         return router.use(path, fn)
@@ -283,10 +264,10 @@ export class Application<
 
       debug('.use app under %s', path)
       fn.mountpath = path
-      fn.parent = this
+      fn.parent = self
 
       // restore .app property on req and res
-      router.use(path, (req, res, next) => {
+      router.use(path, (req: any, res: any, next: any) => {
         const orig = req.app
         fn.handle(req, res, (err: any) => {
           Object.setPrototypeOf(req, orig.request)
@@ -296,8 +277,8 @@ export class Application<
       })
 
       // mounted an app
-      fn.emit('mount', this)
-    }, this)
+      fn.emit('mount', self)
+    })
 
     return this
   }
@@ -722,5 +703,21 @@ function tryRender (view: any, options: any, callback: any) {
     callback(err)
   }
 }
+
+methods.forEach((method) => {
+  // @ts-ignore
+  Application.prototype[method] = function (this: Application, path: string, ...args: any[]) {
+    if (method === 'get' && args.length === 0) {
+      // app.get(setting)
+      return this.set(path)
+    }
+
+    const route = this.route(path)
+    route[method].apply(route, args)
+    return this
+  }
+})
+
+Application.prototype.use = Application.prototype._use
 
 export const application = new Application()

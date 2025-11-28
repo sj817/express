@@ -48,42 +48,42 @@ type ParamsMap = Record<string, Array<RequestParamHandler>>
  * 处理 HTTP 请求的路由器
  */
 class Router {
-  all!: IRouterMatcher<this, 'all'>
-  acl!: IRouterMatcher<this, 'acl'>
-  bind!: IRouterMatcher<this, 'bind'>
-  checkout!: IRouterMatcher<this, 'checkout'>
-  connect!: IRouterMatcher<this, 'connect'>
-  copy!: IRouterMatcher<this, 'copy'>
-  delete!: IRouterMatcher<this, 'delete'>
-  get!: IRouterMatcher<this, 'get'>
-  head!: IRouterMatcher<this, 'head'>
-  link!: IRouterMatcher<this, 'link'>
-  lock!: IRouterMatcher<this, 'lock'>
-  'm-search'!: IRouterMatcher<this, 'm-search'>
-  merge!: IRouterMatcher<this, 'merge'>
-  mkactivity!: IRouterMatcher<this, 'mkactivity'>
-  mkcalendar!: IRouterMatcher<this, 'mkcalendar'>
-  mkcol!: IRouterMatcher<this, 'mkcol'>
-  move!: IRouterMatcher<this, 'move'>
-  notify!: IRouterMatcher<this, 'notify'>
-  options!: IRouterMatcher<this, 'options'>
-  patch!: IRouterMatcher<this, 'patch'>
-  post!: IRouterMatcher<this, 'post'>
-  propfind!: IRouterMatcher<this, 'propfind'>
-  proppatch!: IRouterMatcher<this, 'proppatch'>
-  purge!: IRouterMatcher<this, 'purge'>
-  put!: IRouterMatcher<this, 'put'>
-  query!: IRouterMatcher<this, 'query'>
-  rebind!: IRouterMatcher<this, 'rebind'>
-  report!: IRouterMatcher<this, 'report'>
-  search!: IRouterMatcher<this, 'search'>
-  source!: IRouterMatcher<this, 'source'>
-  subscribe!: IRouterMatcher<this, 'subscribe'>
-  trace!: IRouterMatcher<this, 'trace'>
-  unbind!: IRouterMatcher<this, 'unbind'>
-  unlink!: IRouterMatcher<this, 'unlink'>
-  unlock!: IRouterMatcher<this, 'unlock'>
-  unsubscribe!: IRouterMatcher<this, 'unsubscribe'>
+  declare all: IRouterMatcher<this, 'all'>
+  declare acl: IRouterMatcher<this, 'acl'>
+  declare bind: IRouterMatcher<this, 'bind'>
+  declare checkout: IRouterMatcher<this, 'checkout'>
+  declare connect: IRouterMatcher<this, 'connect'>
+  declare copy: IRouterMatcher<this, 'copy'>
+  declare delete: IRouterMatcher<this, 'delete'>
+  declare get: IRouterMatcher<this, 'get'>
+  declare head: IRouterMatcher<this, 'head'>
+  declare link: IRouterMatcher<this, 'link'>
+  declare lock: IRouterMatcher<this, 'lock'>
+  declare 'm-search': IRouterMatcher<this, 'm-search'>
+  declare merge: IRouterMatcher<this, 'merge'>
+  declare mkactivity: IRouterMatcher<this, 'mkactivity'>
+  declare mkcalendar: IRouterMatcher<this, 'mkcalendar'>
+  declare mkcol: IRouterMatcher<this, 'mkcol'>
+  declare move: IRouterMatcher<this, 'move'>
+  declare notify: IRouterMatcher<this, 'notify'>
+  declare options: IRouterMatcher<this, 'options'>
+  declare patch: IRouterMatcher<this, 'patch'>
+  declare post: IRouterMatcher<this, 'post'>
+  declare propfind: IRouterMatcher<this, 'propfind'>
+  declare proppatch: IRouterMatcher<this, 'proppatch'>
+  declare purge: IRouterMatcher<this, 'purge'>
+  declare put: IRouterMatcher<this, 'put'>
+  declare query: IRouterMatcher<this, 'query'>
+  declare rebind: IRouterMatcher<this, 'rebind'>
+  declare report: IRouterMatcher<this, 'report'>
+  declare search: IRouterMatcher<this, 'search'>
+  declare source: IRouterMatcher<this, 'source'>
+  declare subscribe: IRouterMatcher<this, 'subscribe'>
+  declare trace: IRouterMatcher<this, 'trace'>
+  declare unbind: IRouterMatcher<this, 'unbind'>
+  declare unlink: IRouterMatcher<this, 'unlink'>
+  declare unlock: IRouterMatcher<this, 'unlock'>
+  declare unsubscribe: IRouterMatcher<this, 'unsubscribe'>
 
   /**
    * 使用给定的中间件函数，可选路径，默认为 "/"
