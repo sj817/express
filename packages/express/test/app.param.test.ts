@@ -57,8 +57,8 @@ describe('app', function(){
 
     it('should only call once per request', function (done: any) {
       const app = express();
-      const called = 0;
-      const count = 0;
+      let called = 0;
+      let count = 0;
 
       app.param('user', function(req, res, next, user) {
         called++;
@@ -85,8 +85,8 @@ describe('app', function(){
 
     it('should call when values differ', function (done: any) {
       const app = express();
-      const called = 0;
-      const count = 0;
+      let called = 0;
+      let count = 0;
 
       app.param('user', function(req, res, next, user) {
         called++;
@@ -260,8 +260,8 @@ describe('app', function(){
 
     it('should not call when values differ on error', function (done: any) {
       const app = express();
-      const called = 0;
-      const count = 0;
+      let called = 0;
+      let count = 0;
 
       app.param('user', function(req, res, next, user) {
         called++;
@@ -291,8 +291,8 @@ describe('app', function(){
 
     it('should call when values differ when using "next"', function (done: any) {
       const app = express();
-      const called = 0;
-      const count = 0;
+      let called = 0;
+      let count = 0;
 
       app.param('user', function(req, res, next, user) {
         called++;

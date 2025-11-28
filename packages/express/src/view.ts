@@ -9,7 +9,10 @@
 'use strict'
 import fs from 'node:fs'
 import path from 'node:path'
+import { createRequire } from 'node:module'
 import debugModule from 'debug'
+
+const require = createRequire(import.meta.url)
 
 /**
  * 视图引擎函数类型

@@ -1,5 +1,5 @@
-import express from '../src/index';
-const request = require('supertest');
+import express from '../src/index'
+import request from 'supertest'
 
 describe('res', function () {
   describe('.status(code)', function () {

@@ -5,7 +5,7 @@ import { methods as methods } from '../src/utils.ts';
 import request from 'supertest';
 import * as utils from './support/utils.js';
 
-import shouldSkipQuery from './support/utils.js'.shouldSkipQuery
+import { shouldSkipQuery } from './support/utils.js'
 
 describe('res', function(){
   describe('.send()', function(){

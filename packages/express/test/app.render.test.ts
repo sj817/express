@@ -232,7 +232,7 @@ describe('app', function(){
     describe('caching', function(){
       it('should always lookup view without cache', function (done: any){
         const app = express();
-        const count = 0;
+        let count = 0;
 
         function View(name, options){
           this.name = name;
@@ -262,7 +262,7 @@ describe('app', function(){
 
       it('should cache with "view cache" setting', function (done: any){
         const app = express();
-        const count = 0;
+        let count = 0;
 
         function View(name, options){
           this.name = name;
@@ -337,7 +337,7 @@ describe('app', function(){
     describe('caching', function(){
       it('should cache with cache option', function (done: any){
         const app = express();
-        const count = 0;
+        let count = 0;
 
         function View(name, options){
           this.name = name;

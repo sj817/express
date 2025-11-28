@@ -1,8 +1,7 @@
 import express from '../src/index'
 import request from 'supertest'
-  
 import assert from 'node:assert'
-  , url = await import('node:url');
+const url = await import('node:url')
 
 describe('res', function(){
   describe('.location(url)', function(){

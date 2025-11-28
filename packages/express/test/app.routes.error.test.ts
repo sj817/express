@@ -23,10 +23,10 @@ describe('app', function(){
     it('should only call an error handling routing callback when an error is propagated', function (done: any){
       const app = express();
 
-      const a = false;
-      const b = false;
-      const c = false;
-      const d = false;
+      let a = false;
+      let b = false;
+      let c = false;
+      let d = false;
 
       app.get('/', function (req: any, res: any, next: any){
         next(new Error('fabricated error'));

@@ -702,9 +702,9 @@ function tryRender (view: any, options: any, callback: any) {
   } catch (err) {
     callback(err)
   }
-}
+};
 
-methods.forEach((method) => {
+[...methods, 'all'].forEach((method) => {
   // @ts-ignore
   Application.prototype[method] = function (this: Application, path: string, ...args: any[]) {
     if (method === 'get' && args.length === 0) {
@@ -713,6 +713,7 @@ methods.forEach((method) => {
     }
 
     const route = this.route(path)
+    // @ts-ignore
     route[method].apply(route, args)
     return this
   }

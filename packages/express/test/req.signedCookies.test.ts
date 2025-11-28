@@ -1,6 +1,6 @@
 import express from '../src/index'
 import request from 'supertest'
-  , cookieParser = require('cookie-parser')
+import cookieParser from 'cookie-parser'
 
 describe('req', function(){
   describe('.signedCookies', function(){

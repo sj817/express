@@ -1157,7 +1157,7 @@ describe('app.router', function () {
     // more context: https://github.com/expressjs/express/issues/5743#issuecomment-2277148412
 
     const app = express();
-    const router = new express.Router();
+    let router = new express.Router();
 
     router.use(function (req: any, res: any, next: any) {
       res.setHeader('old', 'foo');

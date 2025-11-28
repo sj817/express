@@ -779,9 +779,8 @@ export class Response<
    *
    * @returns 如果该字段包含多个值，则返回一个用逗号连接的字符串。
    */
-  get (field: string): string | undefined {
-    const value = this.getHeader(field)
-    return Array.isArray(value) ? value.join(', ') : value?.toString()
+  get (field: string): string | number | string[] | undefined {
+    return this.getHeader(field) as string | number | string[] | undefined
   }
 
   /**
@@ -875,10 +874,17 @@ export class Response<
       val = 's:' + sign(val, secret!)
     }
 
-    if (opts.maxAge != null) {
-      const maxAge = opts.maxAge - 0
+    // Handle maxAge option
+    if ('maxAge' in opts) {
+      if (opts.maxAge === null || opts.maxAge === undefined) {
+        delete opts.maxAge
+      } else {
+        const maxAge = opts.maxAge - 0
 
-      if (!isNaN(maxAge)) {
+        if (isNaN(maxAge)) {
+          throw new TypeError('option maxAge is invalid')
+        }
+
         opts.expires = new Date(Date.now() + maxAge)
         opts.maxAge = Math.floor(maxAge / 1000)
       }

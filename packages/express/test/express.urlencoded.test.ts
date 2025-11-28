@@ -151,9 +151,9 @@ describe('express.urlencoded()', function () {
       })
 
       it('should parse array index notation with large array', function (done: any) {
-        const str = 'f[0]=0'
+        let str = 'f[0]=0'
 
-        for (const i = 1; i < 500; i++) {
+        for (let i = 1; i < 500; i++) {
           str += '&f[' + i + ']=' + i.toString(16)
         }
 
@@ -179,9 +179,9 @@ describe('express.urlencoded()', function () {
       })
 
       it('should parse deep object', function (done: any) {
-        const str = 'foo'
+        let str = 'foo'
 
-        for (const i = 0; i < 32; i++) {
+        for (let i = 0; i < 32; i++) {
           str += '[p]'
         }
 
@@ -196,8 +196,8 @@ describe('express.urlencoded()', function () {
             assert.strictEqual(Object.keys(obj).length, 1)
             assert.strictEqual(typeof obj.foo, 'object')
 
-            const depth = 0
-            const ref = obj.foo
+            let depth = 0
+            let ref = obj.foo
             while ((ref = ref.p)) { depth++ }
             assert.strictEqual(depth, 32)
           })
@@ -784,7 +784,7 @@ describe('express.urlencoded()', function () {
 })
 
 function createManyParams (count) {
-  const str = ''
+  let str = ''
 
   if (count === 0) {
     return str
@@ -792,7 +792,7 @@ function createManyParams (count) {
 
   str += '0=0'
 
-  for (const i = 1; i < count; i++) {
+  for (let i = 1; i < count; i++) {
     const n = i.toString(36)
     str += '&' + n + '=' + n
   }

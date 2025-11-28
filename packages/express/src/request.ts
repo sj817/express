@@ -376,7 +376,7 @@ export class Request<
    * 地址时，"X-Forwarded-Host" 头字段将
    * 被信任。
    */
-  get host (): string {
+  get host (): string | undefined {
     const trust = this.app.get('trust proxy fn')
     let val = this.get('X-Forwarded-Host')
 
@@ -388,7 +388,7 @@ export class Request<
       val = val.substring(0, val.indexOf(',')).trimEnd()
     }
 
-    return val || ''
+    return val || undefined
   }
 
   /**
@@ -398,10 +398,10 @@ export class Request<
    * 地址时，"X-Forwarded-Host" 头字段将
    * 被信任。
    */
-  get hostname (): string {
+  get hostname (): string | undefined {
     const host = this.host
 
-    if (!host) return ''
+    if (!host) return undefined
 
     // IPv6 字面量支持
     const offset = host[0] === '[' ? host.indexOf(']') + 1 : 0

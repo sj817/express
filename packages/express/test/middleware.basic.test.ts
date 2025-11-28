@@ -19,7 +19,7 @@ describe('middleware', function(){
       });
 
       app.use(function (req: any, res: any){
-        const buf = '';
+        let buf = '';
         res.setHeader('Content-Type', 'application/json');
         req.setEncoding('utf8');
         req.on('data', function(chunk){ buf += chunk });
