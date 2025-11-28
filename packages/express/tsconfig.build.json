@@ -1,0 +1,42 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "..",
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "router": [
+        "../router/src/index.ts"
+      ],
+      "path-to-regexp": [
+        "../path-to-regexp/src/index.ts"
+      ]
+    },
+    "types": [
+      "node",
+      "qs",
+      "accepts",
+      "body-parser",
+      "content-disposition",
+      "connect",
+      "cookie-signature",
+      "debug",
+      "express",
+      "express-serve-static-core",
+      "mime-types",
+      "parseurl",
+      "range-parser"
+    ]
+  },
+  "include": [
+    "src/**/*",
+    "../router/src/**/*.ts",
+    "../path-to-regexp/src/**/*.ts"
+  ],
+  "exclude": [
+    "../router/src/**/*.spec.ts",
+    "../router/src/**/*.bench.ts",
+    "../path-to-regexp/src/**/*.spec.ts",
+    "../path-to-regexp/src/**/*.bench.ts"
+  ]
+}
