@@ -16,7 +16,7 @@ import etag from 'etag'
 import qs from 'qs'
 import mime from 'mime-types'
 import proxyaddr from 'proxy-addr'
-import { METHODS } from 'node:http'
+import { METHODS, STATUS_CODES } from 'node:http'
 import { Buffer } from 'node:buffer'
 import contentType from 'content-type'
 import querystring from 'node:querystring'
@@ -275,4 +275,60 @@ function createETagGenerator (options: etag.Options) {
 
 function parseExtendedQueryString (str: string) {
   return qs.parse(str, { allowPrototypes: true })
+}
+
+/**
+ * Encode URL to prevent open redirects.
+ *
+ * 替代 encodeurl 包的原生实现
+ *
+ * 注意：此实现与 encodeurl@2.0.0 保持一致。
+ * 仅编码特定的不安全字符和非 ASCII 字符。
+ *
+ * encodeurl 的编码规则：
+ * - 编码所有非 ASCII 字符 (> 0x7E)
+ * - 编码空格和某些特殊字符
+ * - 不编码: 反斜杠(\), 方括号([])
+ *
+ * @param url - URL to encode
+ * @returns Encoded URL
+ * @api private
+ */
+export function encodeUrl (url: string): string {
+  return String(url)
+    // eslint-disable-next-line no-control-regex
+    .replace(/[\x00-\x20"<>^`{|}\x7F-\uFFFF]/g, (c) => {
+      return encodeURIComponent(c)
+    })
+}
+
+/**
+ * Escape special characters in the given string of html.
+ *
+ * 替代 escape-html 包的原生实现
+ *
+ * @param html - String to escape
+ * @returns Escaped string
+ * @api private
+ */
+export function escapeHtml (html: string): string {
+  return String(html)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
+/**
+ * Get status message from status code.
+ *
+ * 替代 statuses 包的原生实现
+ *
+ * @param code - HTTP status code
+ * @returns Status message
+ * @api private
+ */
+export function getStatusMessage (code: number): string | undefined {
+  return STATUS_CODES[code]
 }

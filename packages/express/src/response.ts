@@ -14,17 +14,14 @@
 
 import contentDisposition from 'content-disposition'
 import createError from 'http-errors'
-import encodeUrl from 'encodeurl'
-import escapeHtml from 'escape-html'
 import onFinished from 'on-finished'
 import mime from 'mime-types'
-import statuses from 'statuses'
 import cookie from 'cookie'
 import vary from 'vary'
 import send from 'send'
 import http from 'node:http'
 import { sign } from 'cookie-signature'
-import { setCharset, normalizeType, normalizeTypes } from './utils'
+import { setCharset, normalizeType, normalizeTypes, encodeUrl, escapeHtml, getStatusMessage } from './utils'
 import { extname, resolve, isAbsolute as pathIsAbsolute } from 'node:path'
 import depd from 'depd'
 
@@ -294,7 +291,7 @@ export class Response<
   }
 
   sendStatus (statusCode: StatusCode): this {
-    const body = statuses.message[statusCode] || String(statusCode)
+    const body = getStatusMessage(statusCode) || String(statusCode)
 
     this.status(statusCode)
     this.type('txt')
@@ -1005,11 +1002,11 @@ export class Response<
     // 默认支持 text/html 响应
     this.format({
       text: () => {
-        body = `${statuses.message[status]}. Redirecting to ${address}`
+        body = `${getStatusMessage(status)}. Redirecting to ${address}`
       },
       html: () => {
         const u = escapeHtml(address)
-        body = `<p>${statuses.message[status]}. Redirecting to ${u}</p>`
+        body = `<p>${getStatusMessage(status)}. Redirecting to ${u}</p>`
       },
       default: () => {
         body = ''
