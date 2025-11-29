@@ -30,7 +30,7 @@ export default defineConfig({
   external: [
     ...builtinModules,
     ...builtinModules.map((node) => `node:${node}`),
-    // 'iconv-lite',
+    'iconv-lite',
   ],
   noExternal: [
 

@@ -33,6 +33,7 @@
   "exclude": [
     "node_modules",
     "./**/*.test.ts",
+    "./src/router/test/**/*.ts",
     "../router/src/**/*.spec.ts",
     "../router/src/**/*.bench.ts",
     "../path-to-regexp/src/**/*.spec.ts",

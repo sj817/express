@@ -1,0 +1,30 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "./src",
+    "noEmit": true,
+    "skipLibCheck": true,
+    "paths": {
+      "router": [
+        "./src/router/index.ts"
+      ],
+      "body-parser": [
+        "./src/body-parser/src/index.ts"
+      ],
+      "serve-static": [
+        "./src/serve-static/index.ts"
+      ]
+    },
+    "types": []
+  },
+  "include": [
+    "src/**/*",
+  ],
+  "exclude": [
+    "node_modules",
+    "./**/*.test.ts",
+    "./src/router/test/**/*.ts",
+    "./src/body-parser/test/**/*.ts",
+    "./src/serve-static/test/**/*.ts"
+  ]
+}

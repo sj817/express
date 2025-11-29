@@ -1,7 +1,5 @@
 packages:
-  - "packages/*"
-
-catalog:
-  qs: npm:@karinjs/qs@0.2.0
-  debug: 4.4.0
-  parseurl: 1.3.3
+  - "packages/path-to-regexp"
+  - "packages/send"
+  - "packages/connect"
+  - "packages/serve-static"
