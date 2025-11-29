@@ -4,7 +4,8 @@
     "rootDir": "./src",
     "baseUrl": ".",
     "types": [
-      "node"
+      "node",
+      "express"
     ]
   },
   "include": [

@@ -14,11 +14,7 @@ export default defineConfig({
 
     return { js: '.js', dts: '.d.ts' }
   },
-  dts: {
-    resolve: true,
-    // resolver: 'tsc',
-    // build: true,
-  },
+  dts: true,
   format: ['esm'],
   shims: true,
   target: 'node18',
@@ -31,5 +27,6 @@ export default defineConfig({
   external: [
     ...builtinModules,
     ...builtinModules.map((node) => `node:${node}`),
+    '@karinjs/express',
   ],
 })

@@ -3,6 +3,12 @@
   "compilerOptions": {
     "rootDir": "./src",
     "noEmit": true,
+    "skipLibCheck": true,
+    "paths": {
+      "router": [
+        "./src/router/index.ts"
+      ]
+    },
     "types": [
       "node",
       "qs",
@@ -20,7 +26,7 @@
     ]
   },
   "include": [
-    "src/**/*"
+    "src/**/*",
   ],
   "exclude": [
     "node_modules",

@@ -1,5 +1,5 @@
 {
-  "name": "router",
+  "name": "@karinjs/router",
   "description": "Simple middleware-style router",
   "version": "2.2.0",
   "author": "Douglas Christopher Wilson <doug@somethingdoug.com>",
@@ -7,20 +7,19 @@
     "Blake Embrey <hello@blakeembrey.com>"
   ],
   "license": "MIT",
-  "repository": "pillarjs/router",
+  "repository": "sj817/express",
+  "homepage": "https://github.com/sj817/express",
   "type": "module",
   "dependencies": {
-    "@karinjs/express": "workspace:*",
-    "debug": "^4.4.0",
-    "parseurl": "^1.3.3",
+    "debug": "catalog:",
+    "parseurl": "catalog:",
     "path-to-regexp": "workspace:*"
   },
   "devDependencies": {
+    "@karinjs/express": "workspace:*",
     "@types/finalhandler": "^1.2.4",
     "@types/mocha": "^10.0.10",
-    "@types/parseurl": "^1.3.3",
-    "@types/qs": "^6.14.0",
-    "@types/send": "^1.2.1",
+    "qs": "catalog:",
     "finalhandler": "^2.1.0",
     "mocha": "10.2.0",
     "nyc": "15.1.0",
@@ -29,16 +28,13 @@
     "supertest": "6.3.3"
   },
   "files": [
-    "lib/",
-    "LICENSE",
-    "HISTORY.md",
-    "README.md",
-    "index.js"
+    "dist"
   ],
   "engines": {
     "node": ">= 18"
   },
   "scripts": {
+    "build": "tsc && tsdown",
     "lint": "standard",
     "test": "mocha --reporter spec --bail --check-leaks test/",
     "test:ts": "mocha -r tsx --reporter spec --bail --check-leaks test/*.ts",
@@ -49,8 +45,8 @@
   },
   "exports": {
     ".": {
-      "types": "./src/index.ts",
-      "default": "./src/index.ts"
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.mjs"
     }
   }
 }
