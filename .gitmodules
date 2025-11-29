@@ -1,3 +1,6 @@
 [submodule "packages/path-to-regexp"]
 	path = packages/path-to-regexp
 	url = https://github.com/pillarjs/path-to-regexp
+[submodule "packages/body-parser"]
+	path = packages/body-parser
+	url = https://github.com/expressjs/body-parser
