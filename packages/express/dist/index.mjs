@@ -2,7 +2,6 @@ import { createRequire } from "node:module";
 import { EventEmitter } from "node:events";
 import bodyParser from "body-parser";
 import mixin from "merge-descriptors";
-import once from "once";
 import http, { IncomingMessage, METHODS } from "node:http";
 import fs from "node:fs";
 import path, { extname, isAbsolute, resolve } from "node:path";
@@ -25,8 +24,6 @@ import { isIP } from "node:net";
 import parseRange from "range-parser";
 import contentDisposition from "content-disposition";
 import createError from "http-errors";
-import encodeUrl from "encodeurl";
-import escapeHtml from "escape-html";
 import onFinished from "on-finished";
 import statuses from "statuses";
 import cookie from "cookie";
@@ -36,7 +33,33 @@ import { sign } from "cookie-signature";
 import depd from "depd";
 
 //#region rolldown:runtime
-var __require = /* @__PURE__ */ createRequire(import.meta.url);
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __commonJS = (cb, mod) => function() {
+	return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
+};
+var __copyProps = (to, from, except, desc) => {
+	if (from && typeof from === "object" || typeof from === "function") {
+		for (var keys = __getOwnPropNames(from), i = 0, n = keys.length, key; i < n; i++) {
+			key = keys[i];
+			if (!__hasOwnProp.call(to, key) && key !== except) {
+				__defProp(to, key, {
+					get: ((k) => from[k]).bind(null, key),
+					enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable
+				});
+			}
+		}
+	}
+	return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", {
+	value: mod,
+	enumerable: true
+}) : target, mod));
 
 //#endregion
 //#region src/view.ts
@@ -47,6 +70,7 @@ var __require = /* @__PURE__ */ createRequire(import.meta.url);
 * Copyright(c) 2014-2015 Douglas Christopher Wilson
 * MIT Licensed
 */
+const require = createRequire(import.meta.url);
 /**
 * 模块依赖
 * @private
@@ -97,7 +121,7 @@ var View = class {
 		if (!opts.engines[this.ext]) {
 			const mod = this.ext.slice(1);
 			debug$1("require \"%s\"", mod);
-			const fn = __require(mod).__express;
+			const fn = require(mod).__express;
 			if (typeof fn !== "function") throw new Error("Module \"" + mod + "\" does not provide a view engine.");
 			opts.engines[this.ext] = fn;
 		}
@@ -193,6 +217,21 @@ function tryStat(filePath) {
 * @api private
 */
 const methods$1 = METHODS.map((method) => method.toLowerCase());
+/**
+* Ensure a function is only called once.
+*
+* @param {Function} fn - The function to wrap
+* @return {Function} - The wrapped function
+* @api private
+*/
+function once(fn) {
+	let called = false;
+	return function(...args) {
+		if (called) return;
+		called = true;
+		return fn.apply(this, args);
+	};
+}
 /**
 * Return strong ETag for `body`.
 *
@@ -380,42 +419,7 @@ const debug = debugModule("express:application");
 const trustProxyDefaultSymbol = "@@symbol:trust_proxy_default";
 var Application = class extends EventEmitter {
 	get;
-	all;
-	acl;
-	bind;
-	checkout;
-	connect;
-	copy;
-	delete;
-	head;
-	link;
-	lock;
-	"m-search";
-	merge;
-	mkactivity;
-	mkcalendar;
-	mkcol;
-	move;
-	notify;
-	options;
-	patch;
-	post;
-	propfind;
-	proppatch;
-	purge;
-	put;
-	query;
-	rebind;
-	report;
-	search;
-	source;
-	subscribe;
-	trace;
-	unbind;
-	unlink;
-	unlock;
-	unsubscribe;
-	#router = null;
+	_router = null;
 	cache;
 	engines;
 	settings;
@@ -425,18 +429,6 @@ var Application = class extends EventEmitter {
 	request;
 	response;
 	use;
-	constructor() {
-		super();
-		this.use = this._use.bind(this);
-		methods.forEach((method) => {
-			this[method] = function(path$1, ...args) {
-				if (method === "get" && args.length === 0) return this.set(path$1);
-				const route = this.route(path$1);
-				route[method].apply(route, args);
-				return this;
-			};
-		});
-	}
 	/**
 	* Initialize the server.
 	*
@@ -453,11 +445,11 @@ var Application = class extends EventEmitter {
 		this.defaultConfiguration();
 	}
 	get router() {
-		if (this.#router === null) this.#router = new Router$1({
+		if (!this._router) this._router = new Router$1({
 			caseSensitive: this.enabled("case sensitive routing"),
 			strict: this.enabled("strict routing")
 		});
-		return this.#router;
+		return this._router;
 	}
 	/**
 	* Initialize application configuration.
@@ -542,11 +534,12 @@ var Application = class extends EventEmitter {
 		const fns = args.slice(offset).flat(Infinity);
 		if (fns.length === 0) throw new TypeError("app.use() requires a middleware function");
 		const router = this.router;
-		fns.forEach(function(fn$1) {
+		const self = this;
+		fns.forEach((fn$1) => {
 			if (!fn$1 || !fn$1.handle || !fn$1.set) return router.use(path$1, fn$1);
 			debug(".use app under %s", path$1);
 			fn$1.mountpath = path$1;
-			fn$1.parent = this;
+			fn$1.parent = self;
 			router.use(path$1, (req$1, res$1, next) => {
 				const orig = req$1.app;
 				fn$1.handle(req$1, res$1, (err) => {
@@ -555,8 +548,8 @@ var Application = class extends EventEmitter {
 					next(err);
 				});
 			});
-			fn$1.emit("mount", this);
-		}, this);
+			fn$1.emit("mount", self);
+		});
 		return this;
 	}
 	/**
@@ -812,6 +805,15 @@ function tryRender(view, options, callback) {
 		callback(err);
 	}
 }
+[...methods, "all"].forEach((method) => {
+	Application.prototype[method] = function(path$1, ...args) {
+		if (method === "get" && args.length === 0) return this.set(path$1);
+		const route = this.route(path$1);
+		route[method].apply(route, args);
+		return this;
+	};
+});
+Application.prototype.use = Application.prototype._use;
 const application = new Application();
 
 //#endregion
@@ -1041,7 +1043,7 @@ var Request = class extends IncomingMessage {
 		let val = this.get("X-Forwarded-Host");
 		if (!val || !trust(this.socket.remoteAddress, 0)) val = this.get("Host");
 		else if (val.indexOf(",") !== -1) val = val.substring(0, val.indexOf(",")).trimEnd();
-		return val || "";
+		return val || void 0;
 	}
 	/**
 	* 解析 "Host" 头字段为主机名。
@@ -1052,7 +1054,7 @@ var Request = class extends IncomingMessage {
 	*/
 	get hostname() {
 		const host = this.host;
-		if (!host) return "";
+		if (!host) return void 0;
 		const offset = host[0] === "[" ? host.indexOf("]") + 1 : 0;
 		const index = host.indexOf(":", offset);
 		return index !== -1 ? host.substring(0, index) : host;
@@ -1091,6 +1093,119 @@ var Request = class extends IncomingMessage {
 const req = Object.create(Request.prototype);
 
 //#endregion
+//#region ../../node_modules/.pnpm/encodeurl@2.0.0/node_modules/encodeurl/index.js
+/*!
+* encodeurl
+* Copyright(c) 2016 Douglas Christopher Wilson
+* MIT Licensed
+*/
+var require_encodeurl = /* @__PURE__ */ __commonJS({ "../../node_modules/.pnpm/encodeurl@2.0.0/node_modules/encodeurl/index.js": ((exports, module) => {
+	/**
+	* Module exports.
+	* @public
+	*/
+	module.exports = encodeUrl$1;
+	/**
+	* RegExp to match non-URL code points, *after* encoding (i.e. not including "%")
+	* and including invalid escape sequences.
+	* @private
+	*/
+	var ENCODE_CHARS_REGEXP = /(?:[^\x21\x23-\x3B\x3D\x3F-\x5F\x61-\x7A\x7C\x7E]|%(?:[^0-9A-Fa-f]|[0-9A-Fa-f][^0-9A-Fa-f]|$))+/g;
+	/**
+	* RegExp to match unmatched surrogate pair.
+	* @private
+	*/
+	var UNMATCHED_SURROGATE_PAIR_REGEXP = /(^|[^\uD800-\uDBFF])[\uDC00-\uDFFF]|[\uD800-\uDBFF]([^\uDC00-\uDFFF]|$)/g;
+	/**
+	* String to replace unmatched surrogate pair with.
+	* @private
+	*/
+	var UNMATCHED_SURROGATE_PAIR_REPLACE = "$1�$2";
+	/**
+	* Encode a URL to a percent-encoded form, excluding already-encoded sequences.
+	*
+	* This function will take an already-encoded URL and encode all the non-URL
+	* code points. This function will not encode the "%" character unless it is
+	* not part of a valid sequence (`%20` will be left as-is, but `%foo` will
+	* be encoded as `%25foo`).
+	*
+	* This encode is meant to be "safe" and does not throw errors. It will try as
+	* hard as it can to properly encode the given URL, including replacing any raw,
+	* unpaired surrogate pairs with the Unicode replacement character prior to
+	* encoding.
+	*
+	* @param {string} url
+	* @return {string}
+	* @public
+	*/
+	function encodeUrl$1(url) {
+		return String(url).replace(UNMATCHED_SURROGATE_PAIR_REGEXP, UNMATCHED_SURROGATE_PAIR_REPLACE).replace(ENCODE_CHARS_REGEXP, encodeURI);
+	}
+}) });
+
+//#endregion
+//#region ../../node_modules/.pnpm/escape-html@1.0.3/node_modules/escape-html/index.js
+/*!
+* escape-html
+* Copyright(c) 2012-2013 TJ Holowaychuk
+* Copyright(c) 2015 Andreas Lubbe
+* Copyright(c) 2015 Tiancheng "Timothy" Gu
+* MIT Licensed
+*/
+var require_escape_html = /* @__PURE__ */ __commonJS({ "../../node_modules/.pnpm/escape-html@1.0.3/node_modules/escape-html/index.js": ((exports, module) => {
+	/**
+	* Module variables.
+	* @private
+	*/
+	var matchHtmlRegExp = /["'&<>]/;
+	/**
+	* Module exports.
+	* @public
+	*/
+	module.exports = escapeHtml$1;
+	/**
+	* Escape special characters in the given string of html.
+	*
+	* @param  {string} string The string to escape for inserting into HTML
+	* @return {string}
+	* @public
+	*/
+	function escapeHtml$1(string) {
+		var str = "" + string;
+		var match = matchHtmlRegExp.exec(str);
+		if (!match) return str;
+		var escape;
+		var html = "";
+		var index = 0;
+		var lastIndex = 0;
+		for (index = match.index; index < str.length; index++) {
+			switch (str.charCodeAt(index)) {
+				case 34:
+					escape = "&quot;";
+					break;
+				case 38:
+					escape = "&amp;";
+					break;
+				case 39:
+					escape = "&#39;";
+					break;
+				case 60:
+					escape = "&lt;";
+					break;
+				case 62:
+					escape = "&gt;";
+					break;
+				default: continue;
+			}
+			if (lastIndex !== index) html += str.substring(lastIndex, index);
+			lastIndex = index + 1;
+			html += escape;
+		}
+		return lastIndex !== index ? html + str.substring(lastIndex, index) : html;
+	}
+}) });
+
+//#endregion
 //#region src/response.ts
 /*!
 * express
@@ -1102,6 +1217,8 @@ const req = Object.create(Request.prototype);
 * Module dependencies.
 * @private
 */
+var import_encodeurl = /* @__PURE__ */ __toESM(require_encodeurl(), 1);
+var import_escape_html = /* @__PURE__ */ __toESM(require_escape_html(), 1);
 const deprecate = depd("express");
 var Response = class extends http.ServerResponse {
 	app;
@@ -1266,7 +1383,7 @@ var Response = class extends http.ServerResponse {
 		if (typeof options === "function") done = options;
 		else if (options) opts = options;
 		if (!opts.root && !isAbsolute(path$1)) throw new TypeError("path must be absolute or specify root to res.sendFile");
-		const pathname = encodeUrl(path$1);
+		const pathname = (0, import_encodeurl.default)(path$1);
 		opts.etag = this.app.enabled("etag");
 		sendfile(res$1, send(req$1, pathname, opts), opts, function(err) {
 			if (done) return done(err);
@@ -1453,8 +1570,7 @@ var Response = class extends http.ServerResponse {
 	* @returns 如果该字段包含多个值，则返回一个用逗号连接的字符串。
 	*/
 	get(field) {
-		const value = this.getHeader(field);
-		return Array.isArray(value) ? value.join(", ") : value?.toString();
+		return this.getHeader(field);
 	}
 	/**
 	* 清除 cookie `name`。
@@ -1477,12 +1593,12 @@ var Response = class extends http.ServerResponse {
 		if (signed && !secret) throw new Error("cookieParser(\"secret\") required for signed cookies");
 		let val = typeof value === "object" ? "j:" + JSON.stringify(value) : String(value);
 		if (signed) val = "s:" + sign(val, secret);
-		if (opts.maxAge != null) {
+		if ("maxAge" in opts) if (opts.maxAge === null || opts.maxAge === void 0) delete opts.maxAge;
+		else {
 			const maxAge = opts.maxAge - 0;
-			if (!isNaN(maxAge)) {
-				opts.expires = new Date(Date.now() + maxAge);
-				opts.maxAge = Math.floor(maxAge / 1e3);
-			}
+			if (isNaN(maxAge)) throw new TypeError("option maxAge is invalid");
+			opts.expires = new Date(Date.now() + maxAge);
+			opts.maxAge = Math.floor(maxAge / 1e3);
 		}
 		if (opts.path == null) opts.path = "/";
 		this.append("Set-Cookie", cookie.serialize(name, String(val), opts));
@@ -1520,7 +1636,7 @@ var Response = class extends http.ServerResponse {
 	location(url) {
 		let loc = url;
 		if (url === "back") loc = this.req.get("Referrer") || "/";
-		return this.set("Location", encodeUrl(loc));
+		return this.set("Location", (0, import_encodeurl.default)(loc));
 	}
 	redirect(urlOrStatus, maybeUrl) {
 		let status = 302;
@@ -1539,7 +1655,7 @@ var Response = class extends http.ServerResponse {
 				body = `${statuses.message[status]}. Redirecting to ${address}`;
 			},
 			html: () => {
-				const u = escapeHtml(address);
+				const u = (0, import_escape_html.default)(address);
 				body = `<p>${statuses.message[status]}. Redirecting to ${u}</p>`;
 			},
 			default: () => {
@@ -1704,7 +1820,7 @@ function createApplication() {
 	return app;
 }
 const express = Object.assign(createApplication, {
-	application,
+	application: Application.prototype,
 	request: req,
 	response: res,
 	Route,
@@ -1715,7 +1831,6 @@ const express = Object.assign(createApplication, {
 	text: bodyParser.text,
 	urlencoded: bodyParser.urlencoded
 });
-console.log(express);
 
 //#endregion
 export { Route, Router, application, express as default, express, req as request, res as response };

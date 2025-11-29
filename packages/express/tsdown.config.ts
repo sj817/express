@@ -15,7 +15,7 @@ export default defineConfig({
     return { js: '.js', dts: '.d.ts' }
   },
   dts: {
-    resolve: true,
+    // resolve: true,
     // resolver: 'tsc',
     // build: true,
   },
@@ -32,9 +32,9 @@ export default defineConfig({
     ...builtinModules,
     ...builtinModules.map((node) => `node:${node}`),
   ],
-  noExternal:[
+  noExternal: [
 
-  ]
+  ],
   // outputOptions (outputOptions) {
   //   outputOptions.advancedChunks = {
   //     // includeDependenciesRecursively: true,

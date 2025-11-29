@@ -1,6 +1,8 @@
 import { EventEmitter } from "node:events";
 import bodyParser from "body-parser";
 import http, { IncomingMessage } from "node:http";
+import * as router7 from "router";
+import { CookieOptions, IRouterHandler, IRouterMatcher, Locals, MediaType, NextFunction, ParamsDictionary, PathParams, RequestHandler, RequestHandlerParams, RequestParamHandler, Route, Route as Route$1, Router, Router as Router$1 } from "router";
 import * as qs0 from "qs";
 import { ParsedQs } from "qs";
 import serveStatic from "serve-static";
@@ -9,546 +11,6 @@ import { SendOptions } from "send";
 import { CipherKey } from "node:crypto";
 import * as connect0 from "connect";
 
-//#region ../router/src/types/request.d.ts
-/**
- * 路由参数字典接口
- * 用于存储从 URL 路径中解析出的命名参数
- * @example
- * // 路由: /user/:id
- * // URL: /user/123
- * // params: { id: '123' }
- */
-interface ParamsDictionary {
-  [key: string]: string;
-}
-/**
- * 媒体类型接口
- * 表示 HTTP Accept 头中的媒体类型信息
- */
-interface MediaType {
-  /** 完整的媒体类型值，例如 "application/json" */
-  value: string;
-  /** 质量因子，范围从 0 到 1，表示客户端对该媒体类型的偏好程度 */
-  quality: number;
-  /** 主类型，例如 "application"、"text" */
-  type: string;
-  /** 子类型，例如 "json"、"html" */
-  subtype: string;
-}
-/**
- * 下一步处理函数接口
- * 用于在中间件中将控制权传递给下一个中间件或路由处理器
- */
-interface NextFunction {
-  /**
-   * 调用下一个中间件
-   * @param err - 可选的错误对象。如果传入错误，将跳过所有常规中间件，直接调用错误处理中间件
-   */
-  (err?: any): void;
-  /**
-   * 跳出当前路由器，将控制权传递给下一个路由器
-   * @param deferToNext - 传入 "router" 字符串以跳出路由器
-   * @see https://expressjs.com/en/guide/using-middleware.html#middleware.router
-   */
-  (deferToNext: 'router'): void;
-  /**
-   * 跳出当前路由，将控制权传递给同一路径的下一个路由
-   * @param deferToNext - 传入 "route" 字符串以跳出当前路由
-   * @see https://expressjs.com/en/guide/using-middleware.html#middleware.application
-   */
-  (deferToNext: 'route'): void;
-}
-//#endregion
-//#region ../router/src/types/requestHandler.d.ts
-/**
- * 请求参数处理器类型
- * 用于处理路由参数的中间件函数
- * @param req - 请求对象
- * @param res - 响应对象
- * @param next - 下一步处理函数
- * @param value - 路由参数的值
- * @param name - 路由参数的名称
- * @returns 可以返回任意类型，通常为 void 或 Promise<void>
- */
-type RequestParamHandler = (req: Request, res: Response, next: NextFunction, value: any, name: string) => void | Promise<void>;
-/**
- * 请求处理器接口
- * 用于处理 HTTP 请求的标准中间件函数
- * @template P - 路由参数类型，默认为 ParamsDictionary
- * @template ResBody - 响应体类型，默认为 any
- * @template ReqBody - 请求体类型，默认为 any
- * @template ReqQuery - 查询参数类型，默认为 ParsedQs
- * @template LocalsObj - 本地变量对象类型，默认为 Record<string, any>
- * @param req - 请求对象
- * @param res - 响应对象
- * @param next - 下一步处理函数
- * @returns 可以返回任意类型，通常为 void 或 Promise<void>
- */
-interface RequestHandler<P$1 = ParamsDictionary, ResBody = any, ReqBody = any, ReqQuery = ParsedQs, LocalsObj extends Record<string, any> = Record<string, any>> {
-  (req: Request<P$1, ResBody, ReqBody, ReqQuery, LocalsObj>, res: Response<ResBody, LocalsObj>, next: NextFunction): unknown;
-}
-/**
- * 请求处理器参数类型
- * 可以是单个请求处理器、错误处理器或它们的数组
- * @template P - 路由参数类型，默认为 ParamsDictionary
- * @template ResBody - 响应体类型，默认为 any
- * @template ReqBody - 请求体类型，默认为 any
- * @template ReqQuery - 查询参数类型，默认为 ParsedQs
- * @template LocalsObj - 本地变量对象类型，默认为 Record<string, any>
- */
-type RequestHandlerParams<P$1 = ParamsDictionary, ResBody = any, ReqBody = any, ReqQuery = ParsedQs, LocalsObj extends Record<string, any> = Record<string, any>> = RequestHandler<P$1, ResBody, ReqBody, ReqQuery, LocalsObj> | ErrorRequestHandler<P$1, ResBody, ReqBody, ReqQuery, LocalsObj> | Array<RequestHandler<P$1> | ErrorRequestHandler<P$1>>;
-/**
- * 错误请求处理器类型
- * 用于处理 Express 应用中的错误的特殊中间件函数
- * @template P - 路由参数类型，默认为 ParamsDictionary
- * @template ResBody - 响应体类型，默认为 any
- * @template ReqBody - 请求体类型，默认为 any
- * @template ReqQuery - 查询参数类型，默认为 ParsedQs
- * @template LocalsObj - 本地变量对象类型，默认为 Record<string, any>
- * @param err - 错误对象
- * @param req - 请求对象
- * @param res - 响应对象
- * @param next - 下一步处理函数
- * @returns 可以返回任意类型，通常为 void 或 Promise<void>
- */
-type ErrorRequestHandler<P$1 = ParamsDictionary, ResBody = any, ReqBody = any, ReqQuery = ParsedQs, LocalsObj extends Record<string, any> = Record<string, any>> = (err: any, req: Request<P$1, ResBody, ReqBody, ReqQuery, LocalsObj>, res: Response<ResBody, LocalsObj>, next: NextFunction) => unknown;
-//#endregion
-//#region ../router/src/types/parameter.d.ts
-/**
- * 移除字符串尾部的指定后缀
- * @template S - 源字符串类型
- * @template Tail - 要移除的尾部字符串类型
- * @returns 移除尾部后的字符串类型，如果没有匹配则返回原字符串
- */
-type RemoveTail<S extends string, Tail extends string> = S extends `${infer P}${Tail}` ? P : S;
-/**
- * 从路由字符串中提取参数名称
- * 会移除路径分隔符、连字符和点号后的内容
- * @template S - 路由字符串类型
- * @returns 提取出的参数名称类型
- */
-type GetRouteParameter<S extends string> = RemoveTail<RemoveTail<RemoveTail<S, `/${string}`>, `-${string}`>, `.${string}`>;
-/**
- * 解析路由字符串中的参数
- * @template Route - 路由字符串类型
- * @returns 解析出的参数类型对象
- */
-type ParseRouteParameters<Route$1 extends PathParams> = string extends Route$1 ? ParamsDictionary : Route$1 extends `${string}(${string}` ? ParamsDictionary : Route$1 extends `${string}:${infer Rest}` ? (GetRouteParameter<Rest> extends never ? ParamsDictionary : GetRouteParameter<Rest> extends `${infer ParamName}?` ? { [P in ParamName]?: string } : { [P in GetRouteParameter<Rest>]: string }) & (Rest extends `${GetRouteParameter<Rest>}${infer Next}` ? RouteParameters<Next> : unknown) : {};
-/**
- * 路由参数类型
- * 支持必需参数和可选参数的解析
- * @template Route - 路由字符串类型
- * @example
- * // 路由: '/user/:id/posts/:postId?'
- * // 类型: { id: string, postId?: string }
- * @example
- * // 路由: '/user/:id{/posts/:postId}'
- * // 类型: { id: string, posts?: string, postId?: string }
- */
-type RouteParameters<Route$1 extends PathParams> = Route$1 extends `${infer Required}{${infer Optional}}${infer Next}` ? ParseRouteParameters<Required> & Partial<ParseRouteParameters<Optional>> & RouteParameters<Next> : ParseRouteParameters<Route$1>;
-/**
- * 路径参数类型
- * 可以是字符串路径、正则表达式或它们的数组组合
- */
-type PathParams = string | RegExp | Array<string | RegExp>;
-//#endregion
-//#region ../router/src/types/iRouter.d.ts
-declare const methods: readonly ["acl", "bind", "checkout", "connect", "copy", "delete", "get", "head", "link", "lock", "m-search", "merge", "mkactivity", "mkcalendar", "mkcol", "move", "notify", "options", "patch", "post", "propfind", "proppatch", "purge", "put", "query", "rebind", "report", "search", "source", "subscribe", "trace", "unbind", "unlink", "unlock", "unsubscribe"];
-interface IRouterHandler<T, Route$1 extends PathParams = PathParams> {
-  (...handlers: Array<RequestHandler<RouteParameters<Route$1>>>): T;
-  (...handlers: Array<RequestHandlerParams<RouteParameters<Route$1>>>): T;
-  <P$1 = RouteParameters<Route$1>, ResBody = any, ReqBody = any, ReqQuery = ParsedQs, LocalsObj extends Record<string, any> = Record<string, any>>(...handlers: Array<RequestHandler<P$1, ResBody, ReqBody, ReqQuery, LocalsObj>>): T;
-  <P$1 = RouteParameters<Route$1>, ResBody = any, ReqBody = any, ReqQuery = ParsedQs, LocalsObj extends Record<string, any> = Record<string, any>>(...handlers: Array<RequestHandlerParams<P$1, ResBody, ReqBody, ReqQuery, LocalsObj>>): T;
-  <P$1 = ParamsDictionary, ResBody = any, ReqBody = any, ReqQuery = ParsedQs, LocalsObj extends Record<string, any> = Record<string, any>>(...handlers: Array<RequestHandler<P$1, ResBody, ReqBody, ReqQuery, LocalsObj>>): T;
-  <P$1 = ParamsDictionary, ResBody = any, ReqBody = any, ReqQuery = ParsedQs, LocalsObj extends Record<string, any> = Record<string, any>>(...handlers: Array<RequestHandlerParams<P$1, ResBody, ReqBody, ReqQuery, LocalsObj>>): T;
-}
-interface IRouterMatcher<T, Method extends typeof methods[number] | 'all' = typeof methods[number] | 'all'> {
-  <Route$1 extends string, P$1 = RouteParameters<Route$1>, ResBody = any, ReqBody = any, ReqQuery = ParsedQs, LocalsObj extends Record<string, any> = Record<string, any>>(path: Route$1, ...handlers: Array<RequestHandler<P$1, ResBody, ReqBody, ReqQuery, LocalsObj>>): T;
-  <Path extends string, P$1 = RouteParameters<Path>, ResBody = any, ReqBody = any, ReqQuery = ParsedQs, LocalsObj extends Record<string, any> = Record<string, any>>(path: Path, ...handlers: Array<RequestHandlerParams<P$1, ResBody, ReqBody, ReqQuery, LocalsObj>>): T;
-  <P$1 = ParamsDictionary, ResBody = any, ReqBody = any, ReqQuery = ParsedQs, LocalsObj extends Record<string, any> = Record<string, any>>(path: PathParams, ...handlers: Array<RequestHandler<P$1, ResBody, ReqBody, ReqQuery, LocalsObj>>): T;
-  <P$1 = ParamsDictionary, ResBody = any, ReqBody = any, ReqQuery = ParsedQs, LocalsObj extends Record<string, any> = Record<string, any>>(path: PathParams, ...handlers: Array<RequestHandlerParams<P$1, ResBody, ReqBody, ReqQuery, LocalsObj>>): T;
-  (path: PathParams, subApplication: Application): T;
-}
-//#endregion
-//#region ../router/src/types/response.d.ts
-/**
- * 响应本地变量接口
- * 用于存储在响应生命周期内的本地数据
- * 可以通过声明合并来扩展此接口，添加自定义的本地变量类型
- */
-interface Locals {}
-/**
- * Options passed down into `res.cookie`
- * @link https://expressjs.com/en/api.html#res.cookie
- */
-interface CookieOptions {
-  /** Convenient option for setting the expiry time relative to the current time in **milliseconds**. */
-  maxAge?: number;
-  /** Indicates if the cookie should be signed. */
-  signed?: boolean;
-  /** Expiry date of the cookie in GMT. If not specified (undefined), creates a session cookie. */
-  expires?: Date;
-  /** Flags the cookie to be accessible only by the web server. */
-  httpOnly?: boolean;
-  /** Path for the cookie. Defaults to “/”. */
-  path?: string;
-  /** Domain name for the cookie. Defaults to the domain name of the app. */
-  domain?: string;
-  /** Marks the cookie to be used with HTTPS only. */
-  secure?: boolean;
-  /** A synchronous function used for cookie value encoding. Defaults to encodeURIComponent. */
-  encode?: ((val: string) => string) | undefined;
-  /**
-   * Value of the “SameSite” Set-Cookie attribute.
-   * @link https://tools.ietf.org/html/draft-ietf-httpbis-cookie-same-site-00#section-4.1.1.
-   */
-  sameSite?: boolean | 'lax' | 'strict' | 'none';
-  /**
-   * Value of the “Priority” Set-Cookie attribute.
-   * @link https://datatracker.ietf.org/doc/html/draft-west-cookie-priority-00#section-4.3
-   */
-  priority?: 'low' | 'medium' | 'high';
-  /** Marks the cookie to use partioned storage. */
-  partitioned?: boolean;
-}
-//#endregion
-//#region ../router/src/layer.d.ts
-/**
- * 路径匹配结果接口
- */
-interface MatchResult {
-  /** 匹配的参数对象 */
-  params: Record<string, string>;
-  /** 匹配的路径字符串 */
-  path: string;
-}
-/**
- * 路径匹配器函数类型
- */
-type PathMatcher = (path: string) => MatchResult | false;
-/**
- * Layer 配置选项接口
- */
-interface LayerOptions {
-  /** 是否启用严格模式，默认为 false */
-  strict?: boolean;
-  /** 是否区分大小写，默认为 false */
-  sensitive?: boolean;
-  /** 是否匹配路径末尾，默认为 true */
-  end?: boolean;
-}
-/**
- * Layer 类
- * 表示路由器中的一个中间件层
- */
-declare class Layer {
-  /** 处理函数 */
-  handle: RequestHandler | ErrorRequestHandler;
-  /** 函数名称 */
-  name: string;
-  /** 匹配的参数对象 */
-  params: Record<string, string> | undefined;
-  /** 参数键数组 */
-  keys: string[];
-  /** 匹配的路径 */
-  path: string | undefined;
-  /** 是否为根路径且非结束匹配 */
-  slash: boolean;
-  /** 路径匹配器数组 */
-  matchers: PathMatcher[];
-  route?: any;
-  /**
-   * HTTP 方法名称
-   * @description 动态设置
-   */
-  method?: string;
-  regexp?: RegExp;
-  constructor(path: PathParams, options: LayerOptions, fn: RequestHandler | ErrorRequestHandler);
-  /**
-   * 处理层的错误
-   * @param error - 错误对象
-   * @param req - 请求对象
-   * @param res - 响应对象
-   * @param next - 下一步处理函数
-   */
-  handleError(error: any, req: Request, res: Response, next: NextFunction): void;
-  /**
-   * 处理层的请求
-   * @param req - 请求对象
-   * @param res - 响应对象
-   * @param next - 下一步处理函数
-   */
-  handleRequest(req: Request, res: Response, next: NextFunction): void;
-  /**
-   * 检查路径是否匹配，如果匹配则填充 .params
-   * @param path - 要匹配的路径
-   * @returns 是否匹配
-   */
-  match(path: string | null | undefined): boolean;
-}
-//#endregion
-//#region ../router/src/route.d.ts
-/**
- * Route 类
- * 表示一个路由，包含路径和多个处理该路径的中间件层
- */
-declare class Route<T extends PathParams = PathParams> {
-  'acl': IRouterHandler<this, T>;
-  'bind': IRouterHandler<this, T>;
-  'checkout': IRouterHandler<this, T>;
-  'connect': IRouterHandler<this, T>;
-  'copy': IRouterHandler<this, T>;
-  'delete': IRouterHandler<this, T>;
-  'get': IRouterHandler<this, T>;
-  'head': IRouterHandler<this, T>;
-  'link': IRouterHandler<this, T>;
-  'lock': IRouterHandler<this, T>;
-  'm-search': IRouterHandler<this, T>;
-  'merge': IRouterHandler<this, T>;
-  'mkactivity': IRouterHandler<this, T>;
-  'mkcalendar': IRouterHandler<this, T>;
-  'mkcol': IRouterHandler<this, T>;
-  'move': IRouterHandler<this, T>;
-  'notify': IRouterHandler<this, T>;
-  'options': IRouterHandler<this, T>;
-  'patch': IRouterHandler<this, T>;
-  'post': IRouterHandler<this, T>;
-  'propfind': IRouterHandler<this, T>;
-  'proppatch': IRouterHandler<this, T>;
-  'purge': IRouterHandler<this, T>;
-  'put': IRouterHandler<this, T>;
-  'query': IRouterHandler<this, T>;
-  'rebind': IRouterHandler<this, T>;
-  'report': IRouterHandler<this, T>;
-  'search': IRouterHandler<this, T>;
-  'source': IRouterHandler<this, T>;
-  'subscribe': IRouterHandler<this, T>;
-  'trace': IRouterHandler<this, T>;
-  'unbind': IRouterHandler<this, T>;
-  'unlink': IRouterHandler<this, T>;
-  'unlock': IRouterHandler<this, T>;
-  'unsubscribe': IRouterHandler<this, T>;
-  /** 路由路径 */
-  path: PathParams;
-  /** 中间件层栈 */
-  stack: Layer[];
-  /** 支持的 HTTP 方法映射 */
-  methods: Record<string, boolean>;
-  /**
-   * 初始化 Route 实例
-   * @param path - 路由路径
-   */
-  constructor(path: PathParams);
-  /**
-   * 为指定的 HTTP 方法添加处理器
-   * @param method - HTTP 方法名称
-   * @param handlers - 处理器函数或函数数组
-   * @returns 返回 this 以支持链式调用
-   * @private
-   */
-  private _method;
-  /**
-   * 检查路由是否处理指定的 HTTP 方法
-   * @param method - HTTP 方法名称
-   * @returns 是否处理该方法
-   * @private
-   */
-  _handlesMethod(method: string): boolean;
-  /**
-   * 获取路由支持的 HTTP 方法列表
-   * @returns HTTP 方法名称数组（大写）
-   * @private
-   */
-  _methods(): string[];
-  /**
-   * 将请求分发到此路由的处理器
-   * @param req - 请求对象
-   * @param res - 响应对象
-   * @param done - 完成回调函数
-   * @private
-   */
-  dispatch(req: Request, res: Response, done: NextFunction): void;
-  /**
-   * 为所有 HTTP 方法添加处理器
-   *
-   * 行为类似中间件，可以响应或调用 `next` 继续处理
-   *
-   * 可以使用多次 `.all` 调用来添加多个处理器
-   *
-   * @example
-   * ```ts
-   * function check_something(req, res, next){
-   *   next()
-   * }
-   *
-   * function validate_user(req, res, next){
-   *   next()
-   * }
-   *
-   * route
-   *   .all(validate_user)
-   *   .all(check_something)
-   *   .get(function(req, res, next){
-   *     res.send('hello world')
-   *   })
-   * ```
-   *
-   * @param handlers - 处理器函数或函数数组
-   * @returns 返回 this 以支持链式调用
-   */
-  all(...handlers: Array<RequestHandler | ErrorRequestHandler>): this;
-}
-//#endregion
-//#region ../router/src/index.d.ts
-/**
- * Module variables.
- * @private
- */
-/**
- * Router 配置选项接口
- */
-interface RouterOptions {
-  /** 是否区分大小写，默认为 false */
-  caseSensitive?: boolean;
-  /** 是否合并参数，默认为 false */
-  mergeParams?: boolean;
-  /** 是否启用严格模式，默认为 false */
-  strict?: boolean;
-}
-/**
- * 参数处理器映射类型
- */
-type ParamsMap = Record<string, Array<RequestParamHandler>>;
-/**
- * Router 类
- * 处理 HTTP 请求的路由器
- */
-declare class Router {
-  all: IRouterMatcher<this, 'all'>;
-  acl: IRouterMatcher<this, 'acl'>;
-  bind: IRouterMatcher<this, 'bind'>;
-  checkout: IRouterMatcher<this, 'checkout'>;
-  connect: IRouterMatcher<this, 'connect'>;
-  copy: IRouterMatcher<this, 'copy'>;
-  delete: IRouterMatcher<this, 'delete'>;
-  get: IRouterMatcher<this, 'get'>;
-  head: IRouterMatcher<this, 'head'>;
-  link: IRouterMatcher<this, 'link'>;
-  lock: IRouterMatcher<this, 'lock'>;
-  'm-search': IRouterMatcher<this, 'm-search'>;
-  merge: IRouterMatcher<this, 'merge'>;
-  mkactivity: IRouterMatcher<this, 'mkactivity'>;
-  mkcalendar: IRouterMatcher<this, 'mkcalendar'>;
-  mkcol: IRouterMatcher<this, 'mkcol'>;
-  move: IRouterMatcher<this, 'move'>;
-  notify: IRouterMatcher<this, 'notify'>;
-  options: IRouterMatcher<this, 'options'>;
-  patch: IRouterMatcher<this, 'patch'>;
-  post: IRouterMatcher<this, 'post'>;
-  propfind: IRouterMatcher<this, 'propfind'>;
-  proppatch: IRouterMatcher<this, 'proppatch'>;
-  purge: IRouterMatcher<this, 'purge'>;
-  put: IRouterMatcher<this, 'put'>;
-  query: IRouterMatcher<this, 'query'>;
-  rebind: IRouterMatcher<this, 'rebind'>;
-  report: IRouterMatcher<this, 'report'>;
-  search: IRouterMatcher<this, 'search'>;
-  source: IRouterMatcher<this, 'source'>;
-  subscribe: IRouterMatcher<this, 'subscribe'>;
-  trace: IRouterMatcher<this, 'trace'>;
-  unbind: IRouterMatcher<this, 'unbind'>;
-  unlink: IRouterMatcher<this, 'unlink'>;
-  unlock: IRouterMatcher<this, 'unlock'>;
-  unsubscribe: IRouterMatcher<this, 'unsubscribe'>;
-  /**
-   * 使用给定的中间件函数，可选路径，默认为 "/"
-   *
-   * Use（类似 `.all`）将对任何 HTTP 方法运行，但不会为这些方法添加处理器，
-   * 因此 OPTIONS 请求不会考虑 `.use` 函数，即使它们可以响应。
-   *
-   * 另一个区别是 _route_ 路径被剥离且对处理器函数不可见。
-   * 这个特性的主要效果是挂载的处理器可以在没有任何代码更改的情况下操作，
-   * 无论 "prefix" 路径名是什么。
-   *
-   * @param handler - 中间件函数或路径
-   * @param handlers - 额外的中间件函数
-   * @returns 返回 this 以支持链式调用
-   * @public
-   */
-  use: IRouterHandler<this> & IRouterMatcher<this>;
-  /** 是否区分大小写 */
-  caseSensitive?: boolean;
-  /** 是否合并参数 */
-  mergeParams?: boolean;
-  /** 参数处理器映射 */
-  params: ParamsMap;
-  /**
-   * 是否启用严格模式
-   * @default false
-   */
-  strict: boolean;
-  /** 中间件层栈 */
-  stack: Layer[];
-  /**
-   * 初始化 Router 实例
-   * @param options - 路由器配置选项
-   */
-  constructor(options?: RouterOptions);
-  /**
-   * 将参数占位符 `name` 映射到给定的回调函数
-   *
-   * 参数映射用于为使用规范化占位符的路由提供前置条件。
-   * 例如，_:user_id_ 参数可以自动从数据库加载用户信息，而无需任何额外代码。
-   *
-   * 回调函数使用与中间件相同的签名，唯一的区别是传递了占位符的值，
-   * 在这种情况下是用户的 _id_。一旦调用了 `next()` 函数，就像中间件一样，
-   * 它将继续执行路由或后续的参数函数。
-   *
-   * 就像在中间件中一样，您必须响应请求或调用 next 以避免请求停滞。
-   *
-   * @example
-   * ```ts
-   * router.param('user_id', function(req, res, next, id){
-   *   User.find(id, function(err, user){
-   *     if (err) {
-   *       return next(err)
-   *     } else if (!user) {
-   *       return next(new Error('failed to load user'))
-   *     }
-   *     req.user = user
-   *     next()
-   *   })
-   * })
-   * ```
-   *
-   * @param name - 参数名称
-   * @param fn - 回调函数
-   * @returns 返回 this 以支持链式调用
-   * @public
-   */
-  param(name: string, fn: RequestParamHandler): this;
-  /**
-   * 将请求和响应分发到路由器
-   *
-   * @param req - 请求对象
-   * @param res - 响应对象
-   * @param callback - 回调函数
-   * @private
-   */
-  handle(req: Request, res: Response, callback: NextFunction): void;
-  /**
-   * @description 类型过于复杂，已经在构造器实现绑定
-   */
-  private _use;
-  route<T extends PathParams>(prefix: T): Route<T>;
-  route(prefix: PathParams): Route;
-}
-declare const RouterExport: {
-  (options?: RouterOptions): RequestHandler & Router;
-  new (options?: RouterOptions): RequestHandler & Router;
-  prototype: typeof Router.prototype;
-};
-//#endregion
 //#region src/application.types.d.ts
 type ApplicationRequestHandler<T> = IRouterHandler<T> & IRouterMatcher<T> & ((...handlers: RequestHandlerParams[]) => T);
 //#endregion
@@ -899,7 +361,7 @@ declare class Response<ResBody = any, LocalsObj extends Record<string, any> = Re
    *
    * @returns 如果该字段包含多个值，则返回一个用逗号连接的字符串。
    */
-  get(field: string): string | undefined;
+  get(field: string): string | number | string[] | undefined;
   /**
    * 清除 cookie `name`。
    * @param name 要清除的 cookie 名称
@@ -1089,7 +551,6 @@ declare const res: Response;
 //#endregion
 //#region src/application.d.ts
 declare class Application<LocalsObj extends Record<string, any> = Record<string, any>> extends EventEmitter {
-  #private;
   get: ((name: string) => any) & IRouterMatcher<this, 'get'>;
   all: IRouterMatcher<this, 'all'>;
   acl: IRouterMatcher<this, 'acl'>;
@@ -1101,7 +562,7 @@ declare class Application<LocalsObj extends Record<string, any> = Record<string,
   head: IRouterMatcher<this, 'head'>;
   link: IRouterMatcher<this, 'link'>;
   lock: IRouterMatcher<this, 'lock'>;
-  'm-search': IRouterMatcher<this, 'm-search'>;
+  'msearch': IRouterMatcher<this, 'm-search'>;
   merge: IRouterMatcher<this, 'merge'>;
   mkactivity: IRouterMatcher<this, 'mkactivity'>;
   mkcalendar: IRouterMatcher<this, 'mkcalendar'>;
@@ -1126,6 +587,7 @@ declare class Application<LocalsObj extends Record<string, any> = Record<string,
   unlink: IRouterMatcher<this, 'unlink'>;
   unlock: IRouterMatcher<this, 'unlock'>;
   unsubscribe: IRouterMatcher<this, 'unsubscribe'>;
+  _router: ReturnType<typeof Router$1> | null;
   cache: Record<string, any>;
   engines: Record<string, any>;
   settings: any;
@@ -1135,7 +597,6 @@ declare class Application<LocalsObj extends Record<string, any> = Record<string,
   request: Request;
   response: Response;
   use: ApplicationRequestHandler<this>;
-  constructor();
   /**
    * Initialize the server.
    *
@@ -1146,7 +607,7 @@ declare class Application<LocalsObj extends Record<string, any> = Record<string,
    * @private
    */
   init(): void;
-  get router(): RequestHandler<ParamsDictionary, any, any, qs0.ParsedQs, Record<string, any>> & Router;
+  get router(): router7.RequestHandler<router7.ParamsDictionary, any, any, qs0.ParsedQs, Record<string, any>> & router7.IRouter;
   /**
    * Initialize application configuration.
    * @private
@@ -1171,7 +632,7 @@ declare class Application<LocalsObj extends Record<string, any> = Record<string,
    *
    * @public
    */
-  private _use;
+  _use(...args: any[]): this;
   /**
    * Proxy to the app `Router#route()`
    * Returns a new `Route` instance for the _path_.
@@ -1181,7 +642,7 @@ declare class Application<LocalsObj extends Record<string, any> = Record<string,
    *
    * @public
    */
-  route(path: PathParams): Route<PathParams>;
+  route(path: PathParams): router7.Route<PathParams>;
   /**
      * 注册给定的模板引擎回调函数 `fn`
   * 作为 `ext`。
@@ -1411,13 +872,13 @@ declare class Application<LocalsObj extends Record<string, any> = Record<string,
 declare const application: Application<Record<string, any>>;
 //#endregion
 //#region src/request.d.ts
-declare class Request<P$1 = ParamsDictionary, ResBody = any, ReqBody = any, ReqQuery = ParsedQs, LocalsObj extends Record<string, any> = Record<string, any>> extends IncomingMessage {
+declare class Request<P = ParamsDictionary, ResBody = any, ReqBody = any, ReqQuery = ParsedQs, LocalsObj extends Record<string, any> = Record<string, any>> extends IncomingMessage {
   app: Application;
   res: Response<ResBody, LocalsObj>;
-  params: P$1;
+  params: P;
   body: ReqBody;
   cookies: any;
-  route: Route;
+  route: Route$1;
   secret?: CipherKey;
   signedCookies: any;
   baseUrl: string;
@@ -1623,7 +1084,7 @@ declare class Request<P$1 = ParamsDictionary, ResBody = any, ReqBody = any, ReqQ
    * 地址时，"X-Forwarded-Host" 头字段将
    * 被信任。
    */
-  get host(): string;
+  get host(): string | undefined;
   /**
    * 解析 "Host" 头字段为主机名。
    *
@@ -1631,7 +1092,7 @@ declare class Request<P$1 = ParamsDictionary, ResBody = any, ReqBody = any, ReqQ
    * 地址时，"X-Forwarded-Host" 头字段将
    * 被信任。
    */
-  get hostname(): string;
+  get hostname(): string | undefined;
   /**
    * 检查请求是否新鲜，即
    * Last-Modified 或 ETag
@@ -1659,14 +1120,15 @@ declare const req: Request;
  */
 declare function createApplication(): any;
 declare const express: typeof createApplication & {
-  application: Application<Record<string, any>>;
-  request: Request<ParamsDictionary, any, any, qs0.ParsedQs, Record<string, any>>;
+  application: Application<any>;
+  request: Request<router7.ParamsDictionary, any, any, qs0.ParsedQs, Record<string, any>>;
   response: Response<any, Record<string, any>, number>;
   Route: typeof Route;
   Router: {
-    (options?: RouterOptions): RequestHandler & Router;
-    new (options?: RouterOptions): RequestHandler & Router;
-    prototype: Router;
+    (options?: router7.RouterOptions): router7.RequestHandler & router7.IRouter;
+    new (options?: router7.RouterOptions): router7.RequestHandler & router7.IRouter;
+    prototype: router7.IRouter;
+    Route: typeof Route;
   };
   json: (options?: bodyParser.OptionsJson) => connect0.NextHandleFunction;
   raw: (options?: bodyParser.Options) => connect0.NextHandleFunction;
@@ -1675,4 +1137,4 @@ declare const express: typeof createApplication & {
   urlencoded: (options?: bodyParser.OptionsUrlencoded) => connect0.NextHandleFunction;
 };
 //#endregion
-export { type Application, type Request, type Response, Route, RouterExport as Router, application, express as default, express, req as request, res as response };
+export { type Application, type Request, type Response, Route, Router, application, express as default, express, req as request, res as response };
