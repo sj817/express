@@ -7,13 +7,15 @@
     "paths": {
       "router": [
         "./src/router/index.ts"
+      ],
+      "body-parser": [
+        "./src/body-parser/src/index.ts"
       ]
     },
     "types": [
       "node",
       "qs",
       "accepts",
-      "body-parser",
       "content-disposition",
       "connect",
       "cookie-signature",
@@ -30,6 +32,7 @@
   ],
   "exclude": [
     "node_modules",
+    "./**/*.test.ts",
     "../router/src/**/*.spec.ts",
     "../router/src/**/*.bench.ts",
     "../path-to-regexp/src/**/*.spec.ts",

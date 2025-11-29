@@ -1,6 +1,5 @@
-// import path from 'node:path'
-import { builtinModules } from 'node:module'
 import path from 'node:path'
+import { builtinModules } from 'node:module'
 import { defineConfig } from 'tsdown/config'
 
 export default defineConfig({
@@ -28,51 +27,50 @@ export default defineConfig({
   outDir: 'dist',
   clean: true,
   treeshake: true,
-  // unbundle
-  // 忽略node内置模块的打包
   external: [
     ...builtinModules,
     ...builtinModules.map((node) => `node:${node}`),
+    // 'iconv-lite',
   ],
   noExternal: [
 
   ],
   // 在开发模式下启用 用于分析打包体积
-  outputOptions (outputOptions) {
-    outputOptions.chunkFileNames = 'chunks/[name]-[hash].js'
-    outputOptions.advancedChunks = {
-      // 该选项的作用是指示打包工具是否递归地将模块的依赖包含在生成的 chunk 中。
-      includeDependenciesRecursively: false,
-      groups: [
-        {
-          // 按包名分组
-          name (id) {
-            console.log(id)
-            if (id.includes('node_modules')) {
-              const pkg = getPackageName(id)
-              // /** 文件名称 不包含后缀 */
-              const name = path.basename(id, path.extname(id))
-              return `${pkg || 'vendor'}/${name}`
-            }
-            return null
-          },
+  // outputOptions (outputOptions) {
+  //   outputOptions.chunkFileNames = 'chunks/[name]-[hash].js'
+  //   outputOptions.advancedChunks = {
+  //     // 该选项的作用是指示打包工具是否递归地将模块的依赖包含在生成的 chunk 中。
+  //     includeDependenciesRecursively: false,
+  //     groups: [
+  //       {
+  //         // 按包名分组
+  //         name (id) {
+  //           console.log(id)
+  //           if (id.includes('node_modules')) {
+  //             const pkg = getPackageName(id)
+  //             // /** 文件名称 不包含后缀 */
+  //             const name = path.basename(id, path.extname(id))
+  //             return `${pkg || 'vendor'}/${name}`
+  //           }
+  //           return null
+  //         },
 
-          // 匹配 node_modules 下所有模块
-          test: /.*/,
+  //         // 匹配 node_modules 下所有模块
+  //         test: /.*/,
 
-          priority: 1,
+  //         priority: 1,
 
-          // 每个包最大 100KB，超过会拆成 2 个、1 个...
-          maxSize: 100000,
+  //         // 每个包最大 100KB，超过会拆成 2 个、1 个...
+  //         maxSize: 100000,
 
-          // 单模块也不能超过 100 KB
-          maxModuleSize: 250000,
-        },
-      ],
-    }
+  //         // 单模块也不能超过 100 KB
+  //         maxModuleSize: 250000,
+  //       },
+  //     ],
+  //   }
 
-    return outputOptions
-  },
+  //   return outputOptions
+  // },
 })
 
 const getPackageName = (filePath: string): string | null => {
