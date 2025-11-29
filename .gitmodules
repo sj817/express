@@ -4,3 +4,6 @@
 [submodule "packages/body-parser"]
 	path = packages/body-parser
 	url = https://github.com/expressjs/body-parser
+[submodule "packages/serve-static"]
+	path = packages/serve-static
+	url = https://github.com/expressjs/serve-static
