@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.3](https://github.com/sj817/express/compare/express-v1.1.2...express-v1.1.3) (2025-11-30)
+
+
+### 🐛 Bug Fixes
+
+* devDependencies ([d4770c3](https://github.com/sj817/express/commit/d4770c3f548db724ae43447460e1ebb9e6fbe936))
+
 ## [1.1.2](https://github.com/sj817/express/compare/express-v1.1.1...express-v1.1.2) (2025-11-30)
 
 
