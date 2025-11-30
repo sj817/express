@@ -7,7 +7,7 @@ import type { ParamsDictionary } from './request'
  * @template Tail - 要移除的尾部字符串类型
  * @returns 移除尾部后的字符串类型，如果没有匹配则返回原字符串
  */
-type RemoveTail<S extends string, Tail extends string> = S extends `${infer P}${Tail}` ? P : S
+export type RemoveTail<S extends string, Tail extends string> = S extends `${infer P}${Tail}` ? P : S
 
 /**
  * 从路由字符串中提取参数名称
@@ -15,7 +15,7 @@ type RemoveTail<S extends string, Tail extends string> = S extends `${infer P}${
  * @template S - 路由字符串类型
  * @returns 提取出的参数名称类型
  */
-type GetRouteParameter<S extends string> = RemoveTail<
+export type GetRouteParameter<S extends string> = RemoveTail<
   RemoveTail<RemoveTail<S, `/${string}`>, `-${string}`>,
   `.${string}`
 >
@@ -25,7 +25,7 @@ type GetRouteParameter<S extends string> = RemoveTail<
  * @template Route - 路由字符串类型
  * @returns 解析出的参数类型对象
  */
-type ParseRouteParameters<Route extends PathParams> = string extends Route ? ParamsDictionary
+export type ParseRouteParameters<Route extends PathParams> = string extends Route ? ParamsDictionary
   : Route extends `${string}(${string}` ? ParamsDictionary // TODO: handling for regex parameters
   : Route extends `${string}:${infer Rest}` ?
   & (

@@ -1,3 +1,6 @@
+export type * from 'router'
+export type { ParsedQs } from 'qs'
+export type { SendOptions } from 'send'
 export type { Express } from './express'
 export type { Request } from './request'
 export type { Response } from './response'
@@ -17,6 +20,13 @@ export type {
   Locals,
   RequestParamHandler,
   Send,
+  ParamsDictionary,
+  RequestHandlerParams,
+  ErrorRequestHandler,
+  RemoveTail,
+  GetRouteParameter,
+  ParseRouteParameters,
+  RouteParameters,
 } from 'router'
 
 export {
