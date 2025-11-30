@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.4](https://github.com/sj817/express/compare/express-v1.1.3...express-v1.1.4) (2025-11-30)
+
+
+### 🐛 Bug Fixes
+
+* 类型导出 ([a2d3418](https://github.com/sj817/express/commit/a2d3418e057f50c85a3cbdcaf852cba2aca2e860))
+
 ## [1.1.3](https://github.com/sj817/express/compare/express-v1.1.2...express-v1.1.3) (2025-11-30)
 
 
