@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.2](https://github.com/sj817/express/compare/express-v1.1.1...express-v1.1.2) (2025-11-30)
+
+
+### 🐛 Bug Fixes
+
+* ci ([e7188c7](https://github.com/sj817/express/commit/e7188c7f21099db365ca3a35bdeba0371954c438))
+
 ## [1.1.1](https://github.com/sj817/express/compare/express-v1.1.0...express-v1.1.1) (2025-11-30)
 
 
